@@ -3,18 +3,18 @@ import time, os
 
 #Add Variables
 
-f = open("config.txt", "r")
+f = open("config.ini", "r")
+lines = f.read().splitlines()
+CONSUMER_KEY = lines[0]
+CONSUMER_SECRET = lines[1]
+ACCESS_TOKEN = lines[2]
+ACCESS_TOKEN_SECRET = lines[3]
 
-CONSUMER_KEY = f.readline()
-CONSUMER_SECRET = f.readline()
-ACCESS_TOKEN = f.readline()
-ACCESS_TOKEN_SECRET = f.readline()
+ACCOUNT_NAME = lines[4]
+LIST_NAME = lines[5]
 
-ACCOUNT_NAME = f.readline()
-LIST_NAME = f.readline()
-
-RETWEET_COUNTER = f.readline()
-LATEST_ID = f.readline()
+RETWEET_COUNTER = int(lines[6])
+LATEST_ID = lines[7]
 
 f.close()
 
@@ -22,7 +22,9 @@ try:
     twitter = Twython(CONSUMER_KEY, CONSUMER_SECRET, ACCESS_TOKEN, ACCESS_TOKEN_SECRET)
     initiated = True
 except TwythonError as e:
-    print(e.error_code)
+    initiated = False
+    if e.error_code != "400":
+        print("Error " + e.error_code)
 
 if initiated:
     print("Working...")
@@ -42,17 +44,17 @@ if initiated:
                     print("Retweeted", "ID", ids[i]["id_str"], "Retweet Number:", RETWEET_COUNTER)
 
             f1 = open("config_tmp", "w")
-            f1.write(CONSUMER_KEY)
-            f1.write(CONSUMER_SECRET)
-            f1.write(ACCESS_TOKEN)
-            f1.write(ACCESS_TOKEN_SECRET)
-            f1.write(ACCOUNT_NAME)
-            f1.write(LIST_NAME)
-            f1.write(RETWEET_COUNTER)
-            f1.write(LATEST_ID)
+            f1.write(CONSUMER_KEY + '\n')
+            f1.write(CONSUMER_SECRET + '\n')
+            f1.write(ACCESS_TOKEN + '\n')
+            f1.write(ACCESS_TOKEN_SECRET + '\n')
+            f1.write(ACCOUNT_NAME + '\n')
+            f1.write(LIST_NAME + '\n')
+            f1.write(str(RETWEET_COUNTER) + '\n')
+            f1.write(LATEST_ID + '\n')
             f1.close()
-            os.remove("config.txt")
-            os.rename("config_tmp", "config.txt")
+            os.remove("config.ini")
+            os.rename("config_tmp", "config.ini")
 
         except TwythonError as e:
             print(e.error_code)
