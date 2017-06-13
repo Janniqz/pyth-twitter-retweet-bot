@@ -1,20 +1,22 @@
 from twython import Twython
-import time
+import time, os
 
-#Get Variables from https://apps.twitter.com/
+#Add Variables
 
-CONSUMER_KEY = "XXX"
-CONSUMER_SECRET = "XXX"
-ACCESS_TOKEN = "XXX"
-ACCESS_TOKEN_SECRET = "XXX"
+f = open("config.txt", "r")
 
-# List to be retweetet & Screen Name of Owner Account
-ACCOUNT_NAME = "XXX"
-LIST_NAME = "XXX"
+CONSUMER_KEY = f.readline()
+CONSUMER_SECRET = f.readline()
+ACCESS_TOKEN = f.readline()
+ACCESS_TOKEN_SECRET = f.readline()
 
-latest_id = "873315818863566849" # Random Tweet
+ACCOUNT_NAME = f.readline()
+LIST_NAME = f.readline()
 
-retweet_counter = 0
+RETWEET_COUNTER = f.readline()
+LATEST_ID = f.readline()
+
+f.close()
 
 twitter = Twython(CONSUMER_KEY, CONSUMER_SECRET, ACCESS_TOKEN, ACCESS_TOKEN_SECRET)
 
@@ -22,16 +24,29 @@ print("Working...")
 
 while True:
 
-    ids = twitter.get_list_statuses(slug=LIST_NAME, owner_screen_name=ACCOUNT_NAME, include_rts=0, since_id=latest_id)
+    ids = twitter.get_list_statuses(slug=LIST_NAME, owner_screen_name=ACCOUNT_NAME, include_rts=0, since_id=LATEST_ID)
 
     if not len(ids) == 0:
-        latest_id_save = ids[0]["id"]
-        latest_id = str(latest_id_save)
+        LATEST_ID_SAVE = ids[0]["id"]
+        LATEST_ID = str(LATEST_ID_SAVE)
 
     for i in range(len(ids)):
         if not ids[i]['retweeted']:
             twitter.retweet(id=ids[i]["id_str"])
-            retweet_counter += 1
-            print("Retweeted", "ID", ids[i]["id_str"], "Retweet Number:", retweet_counter)
+            RETWEET_COUNTER += 1
+            print("Retweeted", "ID", ids[i]["id_str"], "Retweet Number:", RETWEET_COUNTER)
+
+    f1 = open("config_tmp", "w")
+    f1.write(CONSUMER_KEY)
+    f1.write(CONSUMER_SECRET)
+    f1.write(ACCESS_TOKEN)
+    f1.write(ACCESS_TOKEN_SECRET)
+    f1.write(ACCOUNT_NAME)
+    f1.write(LIST_NAME)
+    f1.write(RETWEET_COUNTER)
+    f1.write(LATEST_ID)
+    f1.close()
+    os.remove("config.txt")
+    os.rename("config_tmp", "config.txt")
 
     time.sleep(60)
